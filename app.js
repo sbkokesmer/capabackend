@@ -5,7 +5,7 @@ import variationRoutes from './routes/variations.js';
 import productRoutes from './routes/products.js';
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
