@@ -19,7 +19,7 @@ router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const fields = [
-      "varyasyonlimit", "toptanfiyati", "isambalaj", "bayiid", "katid", "fiyat", "alisfiyati", "alturunvarmi",
+      "varyasyonlimit", "toptanfiyati", "isambalaj", "bayiid", "subcategory_id", "fiyat", "alisfiyati", "alturunvarmi",
       "sirano", "kdv", "kdvdahil", "indirimaktif", "spotaktif", "populerurunaktif", "ozellestirme", "sikkullanilanaekle",
       "birimfiyati", "satismiktari", "sort_id", "kampanyaaktif", "user_indirim", "fiyat_try", "aktif", "indirimorani",
       "puan", "alokoldomuzicerik", "urunadi", "stokkodu", "uststokkodu", "muhasebekodu", "barkod", "birim", "resim",
@@ -79,10 +79,13 @@ export default router;
 router.get('/categories', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT id, urunadi AS kategori_adi 
-      FROM products 
-      WHERE alturunvarmi = true AND uststokkodu = 'yok' 
-      ORDER BY urunadi ASC
+      SELECT c.id AS category_id, c.name AS category_name, json_agg(
+        json_build_object('id', s.id, 'name', s.name, 'stock_code', s.stock_code)
+      ) AS subcategories
+      FROM categories c
+      LEFT JOIN subcategories s ON s.category_id = c.id
+      GROUP BY c.id, c.name
+      ORDER BY c.name ASC
     `);
     res.json(result.rows);
   } catch (error) {
@@ -94,13 +97,20 @@ router.get('/categories', async (req, res) => {
 // Filtreli ürün çekme
 router.get('/filter', async (req, res) => {
   try {
-    const { katid, minFiyat, maxFiyat, marka, aktif } = req.query;
+    const { category_id, subcategory_id, minFiyat, maxFiyat, marka, aktif } = req.query;
     const conditions = [];
     const values = [];
 
-    if (katid) {
-      conditions.push(`katid = $${values.length + 1}`);
-      values.push(katid);
+    if (subcategory_id) {
+      conditions.push(`subcategory_id = $${values.length + 1}`);
+      values.push(subcategory_id);
+    }
+
+    if (!subcategory_id && category_id) {
+      conditions.push(`subcategory_id IN (
+        SELECT id FROM subcategories WHERE category_id = $${values.length + 1}
+      )`);
+      values.push(category_id);
     }
 
     if (minFiyat) {

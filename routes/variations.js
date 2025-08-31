@@ -13,7 +13,11 @@ router.get('/:stockCode', async (req, res) => {
        WHERE stock_code = $1 AND name IS NOT NULL AND price > 0`,
       [stockCode]
     );
-    res.json(result.rows);
+
+    res.json({
+      hasVariations: result.rows.length > 0,
+      variations: result.rows
+    });
   } catch (err) {
     console.error('❌ DB Error:', err.message);
     res.status(500).json({ error: 'Varyasyon verisi alınamadı' });
