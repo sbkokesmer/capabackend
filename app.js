@@ -6,6 +6,7 @@ import productRoutes from './routes/products.js';
 import customerRoutes from './routes/customers.js';
 import keywordsRoutes from './routes/keywords.js';
 import uploadImageRoute from './routes/upload-images.js';
+import currencyRoutes from './routes/currency.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -17,6 +18,7 @@ app.use('/api/variations', variationRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/keywords', keywordsRoutes);
 app.use('/api', uploadImageRoute);
+app.use('/api/currency', currencyRoutes);
 
 app.listen(PORT, () => {
   console.log(`✅ API is running at http://localhost:${PORT}/api/products/:stockCode/variations`);
