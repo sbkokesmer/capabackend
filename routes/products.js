@@ -24,6 +24,7 @@ router.put('/:id', async (req, res) => {
       "birimfiyati", "satismiktari", "sort_id", "kampanyaaktif", "user_indirim", "fiyat_try", "aktif", "indirimorani",
       "puan", "alokoldomuzicerik", "urunadi", "stokkodu", "uststokkodu", "muhasebekodu", "barkod", "birim", "resim",
       "dizin", "aciklama", "indirimturu", "odemetipi", "indirimsaati", "kullanimsekli", "marka", "keywords", "parabirimi",
+      "stok_miktari",
       "urunlink", "videolink", "mensei", "alerjenuyari", "resimadi", "resimyolu"
     ];
 
