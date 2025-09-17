@@ -8,7 +8,7 @@ router.get('/:stockCode', async (req, res) => {
   const { stockCode } = req.params;
   try {
     const result = await pool.query(
-      `SELECT id, name, stock_code, price, type, available 
+      `SELECT id, name, stock_code, price, type, available, stock_quantity 
        FROM variations 
        WHERE stock_code = $1 AND name IS NOT NULL AND price > 0`,
       [stockCode]
@@ -61,7 +61,7 @@ router.get('/', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT id, name, stock_code, price, type, available FROM variations ${whereClause}`
+      `SELECT id, name, stock_code, price, type, available, stock_quantity FROM variations ${whereClause}`
       , values
     );
     res.json(result.rows);
@@ -74,15 +74,15 @@ router.get('/', async (req, res) => {
 // Admin: Varyasyon güncelle
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, stock_code, price, type, available } = req.body;
+  const { name, stock_code, price, type, available, stock_quantity } = req.body;
 
   try {
     const result = await pool.query(
       `UPDATE variations
-       SET name = $1, stock_code = $2, price = $3, type = $4, available = $5
-       WHERE id = $6
+       SET name = $1, stock_code = $2, price = $3, type = $4, available = $5, stock_quantity = $6
+       WHERE id = $7
        RETURNING *`,
-      [name, stock_code, price, type, available, id]
+      [name, stock_code, price, type, available, stock_quantity, id]
     );
 
     if (result.rowCount === 0) {
@@ -119,13 +119,14 @@ router.delete('/:id', async (req, res) => {
 
 // Admin: Yeni varyasyon ekle
 router.post('/', async (req, res) => {
-  const { name, stock_code, price, type, available } = req.body;
+  const { name, stock_code, price, type, available, stock_quantity } = req.body;
 
   // Varsayılan değerler
   const variationName = name || '';
   const variationPrice = price ?? 0;
   const variationType = type || 'GENEL';
   const isAvailable = available ?? true;
+  const variationStockQuantity = stock_quantity ?? 10;
 
   let finalStockCode = stock_code;
   if (!finalStockCode) {
@@ -143,10 +144,10 @@ router.post('/', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO variations (name, stock_code, price, type, available)
-       VALUES ($1, $2, $3, $4, $5)
+      `INSERT INTO variations (name, stock_code, price, type, available, stock_quantity)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [variationName, finalStockCode, variationPrice, variationType, isAvailable]
+      [variationName, finalStockCode, variationPrice, variationType, isAvailable, variationStockQuantity]
     );
 
     res.status(201).json({ message: 'Varyasyon eklendi', variation: result.rows[0] });
