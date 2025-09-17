@@ -1,11 +1,11 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const db = require('../db');
+import { pool } from '../db.js';
 
 // GET current exchange rates
 router.get('/', async (req, res) => {
   try {
-    const { rows } = await db.query('SELECT * FROM currency_rates LIMIT 1');
+    const { rows } = await pool.query('SELECT * FROM currency_rates LIMIT 1');
     res.status(200).json(rows[0]);
   } catch (error) {
     console.error('💥 GET error:', error);
@@ -22,7 +22,7 @@ router.post('/update', async (req, res) => {
   }
 
   try {
-    await db.query(`
+    await pool.query(`
       INSERT INTO currency_rates (id, usd_rate, eur_rate, updated_at)
       VALUES (1, $1, $2, NOW())
       ON CONFLICT (id)
