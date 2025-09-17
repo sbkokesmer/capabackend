@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
 });
 
 // UPDATE exchange rates
-router.post('/put', async (req, res) => {
+router.put('/', async (req, res) => {
   const { usd_rate, eur_rate } = req.body;
 
   if (!usd_rate || !eur_rate) {
