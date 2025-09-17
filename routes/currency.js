@@ -22,12 +22,15 @@ router.post('/update', async (req, res) => {
   }
 
   try {
+    const inverted_usd = 1 / usd_rate;
+    const inverted_eur = 1 / eur_rate;
+
     await pool.query(`
       INSERT INTO currency_rates (id, usd_rate, eur_rate, updated_at)
       VALUES (1, $1, $2, NOW())
       ON CONFLICT (id)
       DO UPDATE SET usd_rate = $1, eur_rate = $2, updated_at = NOW()
-    `, [usd_rate, eur_rate]);
+    `, [inverted_usd, inverted_eur]);
 
     res.status(200).json({ message: 'Exchange rates updated' });
   } catch (error) {
