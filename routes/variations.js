@@ -10,7 +10,7 @@ router.get('/:stockCode', async (req, res) => {
     const result = await pool.query(
       `SELECT id, name, stock_code, price, type, available, stock_quantity 
        FROM variations 
-       WHERE stock_code = $1 AND name IS NOT NULL AND price > 0`,
+       WHERE stock_code = $1`,
       [stockCode]
     );
 
