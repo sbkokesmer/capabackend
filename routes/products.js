@@ -45,12 +45,15 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Silme
-router.delete('/:id', async (req, res) => {
+// Ürün silme (stokkodu ile)
+router.delete('/:stokkodu', async (req, res) => {
   try {
-    const { id } = req.params;
-    await pool.query('DELETE FROM products WHERE id = $1', [id]);
-    res.json({ success: true, message: `ID ${id} ürün silindi.` });
+    const { stokkodu } = req.params;
+    const result = await pool.query('DELETE FROM products WHERE stokkodu = $1 RETURNING *', [stokkodu]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ success: false, message: `Stok kodu ${stokkodu} olan ürün bulunamadı.` });
+    }
+    res.json({ success: true, message: `Stok kodu ${stokkodu} olan ürün silindi.` });
   } catch (error) {
     console.error('❌ Silme hatası:', error);
     res.status(500).json({ error: 'Ürün silinemedi' });
