@@ -57,6 +57,48 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// Ürün ekleme
+router.post('/', async (req, res) => {
+  try {
+    // Güvenlik: Elle ID verilmesini engelle
+    if ('id' in req.body) delete req.body.id;
+
+    const {
+      urunadi, fiyat, parabirimi, kdv, stok_miktari, birim,
+      mensei, aktif, marka, aciklama, satismiktari,
+      urunlink, kullanimsekli,
+      indirimaktif, kampanyaaktif, populerurunaktif
+    } = req.body;
+
+    // stok kodunu otomatik oluştur
+    const stokkodu = 'U-' + Math.floor(1000 + Math.random() * 9000);
+
+    const result = await pool.query(
+      `INSERT INTO products (
+        urunadi, fiyat, parabirimi, kdv, stok_miktari, birim,
+        mensei, aktif, marka, aciklama, satismiktari,
+        urunlink, kullanimsekli,
+        indirimaktif, kampanyaaktif, populerurunaktif, stokkodu
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6,
+        $7, $8, $9, $10, $11,
+        $12, $13,
+        $14, $15, $16, $17
+      ) RETURNING *`,
+      [
+        urunadi, fiyat, parabirimi, kdv, stok_miktari, birim,
+        mensei, aktif, marka, aciklama, satismiktari,
+        urunlink, kullanimsekli,
+        indirimaktif, kampanyaaktif, populerurunaktif, stokkodu
+      ]
+    );
+
+    res.status(201).json({ success: true, product: result.rows[0] });
+  } catch (error) {
+    console.error('❌ Ürün ekleme hatası:', error);
+    res.status(500).json({ error: 'Ürün eklenemedi' });
+  }
+});
 
 // Varyasyon kontrolü
 router.get('/:stockCode/has-variation', async (req, res) => {
